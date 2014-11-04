@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import datetime
 
@@ -9,8 +9,8 @@ html_body = """
 
 now=datetime.datetime.now()
 
-print "Content-type: text/html\n"
-print html_body % (now.year, now.month, now.day, 
-                   now.hour, now.minute, now.second)
+print("Content-type: text/html\n")
+print(html_body % (now.year, now.month, now.day,
+                   now.hour, now.minute, now.second))
 
 
