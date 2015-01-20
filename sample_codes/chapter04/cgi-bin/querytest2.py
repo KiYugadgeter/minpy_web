@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import cgi
-form=cgi.FieldStorage()
+form = cgi.FieldStorage()
 
 html_body = u"""
 <html>
@@ -11,13 +11,13 @@ html_body = u"""
           content="text/html;charset=utf-8">
   </head>
   <body>
-  %s
+  {0:s}
   </body>
 </html>"""
 
-content=''
+content = ''
 for cnt, item in enumerate(form.getvalue('language')):
-    content+="%d : %s <br />" % (cnt+1, item)
+    content += "{0:d} : {1:s} <br />".format(cnt+1, item)
 
 print "Content-type: text/html\n"
-print html_body % content
+print(html_body.format(content))

@@ -4,12 +4,14 @@
 html_body = u"""
 <html>
   <body>
-  %s
+  {:s}
   </body>
 </html>"""
 
 import cgi
-form=cgi.FieldStorage()
+form = cgi.FieldStorage()
 
-print "Content-type: text/html\n"
-print html_body % form['foo'].value
+#header
+print("Content-type: text/html\n")
+
+print(html_body.format(form['foo'].value))
