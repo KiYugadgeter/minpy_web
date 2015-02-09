@@ -41,25 +41,31 @@ WebアプリケーションのUIとなるフォーム・コントロールの
 ** List07 querytest2.py **
 
     :::python
-    #!/usr/bin/env python
+    #!/usr/bin/env python3
     # coding: utf-8
+    
     import cgi
-    form=cgi.FieldStorage()
-    html_body = u"""
+    form = cgi.FieldStorage()
+    
+    html_body = """
     <html>
-    <head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8"> </head>
-    <body>
-    %s
-    </body>
+      <head>
+        <meta http-equiv="content-type"
+              content="text/html;charset=utf-8">
+      </head>
+      <body>
+      {:s}
+      </body>
     </html>"""
-    content=''
-    for cnt, item in enumerate(form.getvalue('language')):
-        content+="%d : %s <br />" % (cnt+1, item)
-    print "Content-type: text/html¥n"
-    print (html_body % content).encode('utf-8')
+    
+    content = ''
+    for cnt, item in enumerate(form.getvalue('language')):  # (1)
+        content += "{:d} : {:s} <br />".format(cnt+1, item)
+    
+    print("Content-type: text/html\n")
+    print(html_body.format(content))
 
-プログラムでは、組み込み関数enumerate()を使ってシーケンスの要素と要素番号を取り出し、ループ処理を行っています。ループの中では、文字列フォーマット機能を使って、結果として表示する文字列を組み立てています。
+プログラムでは、組み込み関数enumerate()を使ってシーケンスの要素と要素番号を取り出し、ループ処理を行っています。(1) ループの中では、文字列フォーマット機能を使って、結果として表示する文字列を組み立てています。
 
 チェックボックスを2つ以上選択すると、選択した項目が期待通りに表示されます。チェックボックスが1つの場合は、文字列が分割されて表示されてしまいます。文字列もシーケンスなので、ループの中で1文字ずつに分解され、処理されてしまうわけです。
 
@@ -70,10 +76,10 @@ WebアプリケーションのUIとなるフォーム・コントロールの
 
 このようなことを避けるためには2つの対策が考えられます。
 
-1つは、事前にクエリの型を調べる方法です。組み込み関数のisinstance()を使うと、型のチェックが行えます。文字列型であることを調べるためには、basestringが利用できます。リスト型であることを調べるためにはlistが利用できます。インタラクティブシェルで試してみましょう。
+1つは、事前にクエリの型を調べる方法です。組み込み関数のisinstance()を使うと、型のチェックが行えます。文字列型であることを調べるためには、strが利用できます。リスト型であることを調べるためにはlistが利用できます。インタラクティブシェルで試してみましょう。
 
     :::python
-    >>> isinstance('123', basestring) True
+    >>> isinstance('123', str) True
     >>> isinstance('123', list)
     False
     >>> isinstance(['Python', 'Ruby'], list) True
@@ -81,11 +87,11 @@ WebアプリケーションのUIとなるフォーム・コントロールの
 このような方法を使い、クエリの型のチェックが実行できます。型チェックを行い、if文などで場合分けをして処理を振り分けるのです。
 もっと簡易な方法は、クエリのデータを持っているFieldStorageオブジェクトのメソッドを使う、という方法です。FieldStorageオブジェクトには、getvalue()メソッドの他にも、クエリの値を取り出すためのメソッドがいくつか定義されています。
 
-#### getfirs(t name [, default])
+#### getfirst(name [, default])
 
 nameを引数に指定して、クエリを取り出します。対象となるnameの値が1つの場合も複数の場合も、必ず最初の要素となる文字列を返します。複数選択することのないコントロールの値を取り出すときに利用すると便利です。
 
-#### getlis(tname)
+#### getlist(name)
 
 nameを指定してクエリの要素を取り出します。戻り値は必ず文字列のリストになります。
 

@@ -18,13 +18,13 @@ Pythonは、Perlなどと比べ型の扱いが厳密です。その�
     >>> "123"+456
     Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
-    TypeError: cannot concatenate 'str' and 'int' objects
+    TypeError: Can't convert 'int' object to str implicitly
 
 Pythonでは、演算をする前に型を揃えてやる必要があります。数字だけで構成される文字列を整数に変換するには、組み込み関数の「int()」を使います。文字列として連結したい場合には、組み込み関数の「str()」を使います。
 
     :::python
-    >>> int("123")+456 579
-    >>> "123"+str(456) 123456
+    >>> int("123") + 456 579
+    >>> "123" + str(456) 123456
 
 勝手に変換される方が便利、という考え方があるかもしれませんが、それはPythonの思想に反します。あいまいさをできるだけ排除する、というのがPythonの思想なのです。数値を文字列として扱って連結するのか、または文字列を数値として扱って足し算するのか、型を揃えることで明確に処理の内容を指示し、誰が読んでも分かりやすいプログラムを書く、というのがPythonの思想なのです。
 
@@ -60,8 +60,8 @@ isdigit()は整数であることを検査するためには便利です�
     def toNumber(num_str):
         """文字列を適切な型の数値に変換する"""
         try:
-            value=float(num_str)
-            if value==int(value):
+            value = float(num_str)
+            if value == int(value):
                 return int(value)
         except ValueError:
             return 0
@@ -113,32 +113,37 @@ WebアプリケーションのUIから、クエリとして送られてくる
 ** List06 verticalize.py **
 
     :::python
-    #!/usr/bin/env python
+    #!/usr/bin/env python3
     # coding: utf-8
-    import cgi
-    form=cgi.FieldStorage()
-    html_body = u"""
-    <html>
-    <head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8"> </head>
-    <body>
-    %s
-    </body>
-    </html>"""
-    body_line=[]
-    body=form.getvalue('body', '')
-    ￼body=unicode(body, 'utf-8', 'ignore')   # (1)
-    for cnt in range(0, len(body), 10):
-        line=body[:10]
-        line+=''.join([u'□' for i in range(len(line), 10)])    # (2)
-        body_line.append(line)
-        body=body[10:]
-    body_line_v=[u' '.join(reversed(x)) for x in zip(*body_line)]  # (3)
     
-    print "Content-type: text/html¥n"
-    print (html_body % '<br />'.join(body_line_v)).encode('utf-8')
+    import cgi
+    form = cgi.FieldStorage()
+    
+    html_body = """
+    <html>
+      <head>
+        <meta http-equiv="content-type"
+              content="text/html;charset=utf-8" />
+      </head>
+      <body>
+      {:s}
+      </body>
+    </html>"""
+    
+    body_line = []
+    body = form.getvalue('body', '')
+    for cnt in range(0, len(body), 10):
+        line = body[:10]
+        line += ''.join(['□' for i in range(len(line), 10)])
+        body_line.append(line)
+        body = body[10:]
+    
+    body_line_v = ['　'.join(reversed(x)) for x in zip(*body_line)]
+    
+    print("Content-type: text/html\n")
+    print(html_body.format('<br />'.join(body_line_v)).encode('utf-8', 'ignore'))
 
-このプログラムでは、文字列を「リストのリスト」と見なし、右に90度回転することで縦書きの文章を得る、という方針で処理を進めます。リストのリストに分割する過程で、マルチバイト文字の区切りを正しく判定する必要があります。そのために、プログラムの中ほどでクエリを取り出し、unicode()関数を使ってユニコード文字列に変換しています(1)。
+このプログラムでは、文字列を「リストのリスト」と見なし、右に90度回転することで縦書きの文章を得る、という方針で処理を進めます。リストのリストに分割する過程で、マルチバイト文字の区切りを正しく判定する必要があります。
 
 その後のループでは、文字列を10文字ごとに分割して文字列のリストを作っています。10文字より短い行があった場合には、埋め草(□)を使って文字列の長さを揃えています(2)。
 

@@ -37,14 +37,22 @@ Pythonには、URL上にクエリとして渡された値を受け取るため�
 
     :::python
     #!/usr/bin/env python
+    # coding: utf-8
+
     html_body = """
-    <html><body>
-    foo = %s
-    </body></html>"""
+    <html>
+        <body>
+        {:s}
+        </body>
+    </html>"""
+
     import cgi
-    form=cgi.FieldStorage()    # (1)
-    print "Content-type: text/html¥n"
-    print html_bod             # (2)
+    form = cgi.FieldStorage()  # (1)
+    
+    #header
+    print("Content-type: text/html\n")
+    
+    print(html_body.format(form['foo'].value))  # (2)
 
 このプログラムは、「クエリとして渡されたfooというキーを表示する」という単純なプログラムです。日付表示のプログラムと同じように、Pythonの文字列フォーマット機能を使って結果を表示しています。プログラムの中ほどでは、cgiモジュールをインポートしています。
 
@@ -71,7 +79,7 @@ Pythonには、URL上にクエリとして渡された値を受け取るため�
 querytest.pyの最後の行を以下のように書き換えてみてください。クエリを与えないときにもエラーが発生せず、代わりに「N/A」という表示をします。「N/A」というのは「該当なし(Not Applicable)」という意味の略語です。
 
     :::python
-    print html_body % form.getvalue('foo', 'N/A')
+    print(html_body.format(form.getvalue('foo', 'N/A')))
 
 
 #### 「13日の金曜日」を探すWebアプリケーション
@@ -99,30 +107,43 @@ cgi-binフォルダに、以下のスクリプトを設置してみてく�
     :::python
     #!/usr/bin/env python
     # coding: utf-8
+    
     import cgi
     from datetime import datetime
-    html_body = u"""
+    
+    html_body = """
     <html><head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8"> </head>
-    <body>
-    %s
-    </body>
+        <meta http-equiv="content-type"
+              content="text/html;charset=utf-8">
+      </head>
+      <body>
+      {:s}
+      </body>
     </html>"""
-    content=''
-    form=cgi.FieldStorage()
-    year_str=form.getvalue('year', '')
-    if not year_str.isdigit():            # (1)
-        content=u"西暦を入力してください"
+    
+    contenti = ''
+    
+    form = cgi.FieldStorage()
+    year_str = form.getvalue('year', '')
+    if not year_str.isdigit():  # (1)
+        content = "西暦を入力してください"
     else:
-        year=int(year_str)
-        friday13=0
-    for month in range(1, 13):
-        if friday13:                      # (2)
-            content+=u"%d年には合計%d個の13日の金曜日があります" % ( year, friday13)
+        year = int(year_str)
+        friday13 = 0
+        for month in range(1, 13):
+            date = datetime(year, month, 13)
+            if date.weekday() == 4:
+                friday13 += 1
+                content += "{:d}年{:d}月13日は金曜日です".format(year, date.month)
+                content += "<br />"
+    
+        if friday13:  # (2)
+            content += "{:d}年には合計{:d}個の13日の金曜日があります".format(year, friday13)
         else:
-            content+=u"%d年には13日の金曜日がありません"
-    print "Content-type: text/html;charset=utf-8¥n"
-    print (html_body % content).encode('utf-8')
+            content += "{:d}年には13日の金曜日がありません"
+    
+    print("Content-type: text/html;charset=utf-8\n")
+    print(html_body.format(content).encode('utf-8'))
 
 
 ** 図01 西暦3000年には13日の金曜日が1つだけある **

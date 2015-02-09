@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-html_body = u"""
+html_body = """
 <html>
   <body>
   {:s}
