@@ -32,7 +32,7 @@ Webアプリケーションを構成するプログラムでは、�
 
     :::linux
     HTTP/1.1 200 OK
-    Server: SimpleHTTP/0.6 Python/2.5 Date: Sun, 1 Jul 2007 11:31:06 GMT Content-type: text/html Content-Length: 173
+    Server: SimpleHTTP/0.6 Python/3.4 Date: Sun, 1 Jul 2015 11:31:06 GMT Content-type: text/html Content-Length: 173
     <html> ....
 
 
@@ -52,7 +52,7 @@ Webアプリケーションを構成するプログラムでは、�
 
 
     :::python
-    print "Content-type: text/html¥n"
+    print("Content-type: text/html\n")
 
 このように、print文でこのヘッダ行に相当する部分を表示していました。最後にあるのは改行文字です。print文は末尾に改行を追加しますので、ヘッダの後に1つ空の行ができることになります。プログラムに必ず書いていたおまじないは、実はレスポンスのヘッダ部分だったということになります。同様に、プログラムから他の種類のヘッダを出力することで、他の情報をWebブラウザに送り出すことができます。
 
