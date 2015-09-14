@@ -82,14 +82,14 @@ GETメソッドのクエリの中で利用できる文字列には制�
 
 PythonでWebアプリケーションを作る場合、クエリの解析を行うことはほとんどありません。cgiモジュールのFieldStorage()関数を呼ぶときに、クエリの解析が自動的に行われるからです。クエリを解析した結果は、FieldStorage()関数の返すフィールドストレージオブジェクトに格納されます。
 
-デコードとは逆に、クエリをエンコードするには、urllibモジュールのurlencode()関数を利用します。引数としてクエリを辞書にして渡すと、クエリをURLエンコードした文字列が返ってきます。以下に簡単なサンプルを示します。
+デコードとは逆に、クエリをエンコードするには、urllib.parseモジュールのurlencode()関数を利用します。引数としてクエリを辞書にして渡すと、クエリをURLエンコードした文字列が返ってきます。以下に簡単なサンプルを示します。
 
 ** urlencode()関数の使用例 **
 
     :::python
-    import urllib
-    querystr=urllib.urlencode({'foo':'bar& baz'})
-    print querystr
+    import urllib.parse
+    querystr = urllib.parse.urlencode({'foo':'bar&baz'})
+    print(querystr)
     foo=bar%26+baz
 
 #### POSTメソッド
