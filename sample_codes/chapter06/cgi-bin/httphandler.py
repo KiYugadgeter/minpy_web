@@ -1,9 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 
 # 標準モジュールをimportする
 import cgi
 import os
+
 
 class Request(object):
     """
@@ -18,8 +19,9 @@ class Request(object):
         インスタンスの初期化メソッド
         クエリ，環境変数をアトリビュートとして保持する
         """
-        self.form=cgi.FieldStorage()
-        self.environ=environ
+        self.form = cgi.FieldStorage()
+        self.environ = environ
+
 
 import time
 
@@ -27,6 +29,7 @@ _weekdayname = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 _monthname = [None,
               "Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
 
 class Response(object):
     """
@@ -40,16 +43,17 @@ class Response(object):
         インスタンスの初期化メソッド
         ヘッダ用の辞書，本文用の文字列などを初期化する
         """
-        self.headers={'Content-type':'text/html;charset=%s' % charset}
-        self.body=""
-        self.status=200
-        self.status_message=''
+        self.headers = {
+            'Content-type': 'text/html;charset={:s}'.format(charset)}
+        self.body = ""
+        self.status = 200
+        self.status_message = ''
 
     def set_header(self, name, value):
         """
         レスポンスのヘッダを設定する
         """
-        self.headers[name]=value
+        self.headers[name] = value
 
     def get_header(self, name):
         """
@@ -61,7 +65,7 @@ class Response(object):
         """
         レスポンスとして出力する本文の文字列を返す
         """
-        self.body=bodystr
+        self.body = bodystr
 
     def make_output(self, timestamp=None):
         """
@@ -70,12 +74,12 @@ class Response(object):
         if timestamp is None:
             timestamp = time.time()
         year, month, day, hh, mm, ss, wd, y, z = time.gmtime(timestamp)
-        dtstr="%s, %02d %3s %4d %02d:%02d:%02d GMT" % (
+        dtstr = "{:s}, {:02d} {:3s} {:4d} {:02d}:{:02d}:{:02d} GMT".format(
             _weekdayname[wd], day, _monthname[month], year, hh, mm, ss)
         self.set_header("Last-Modified", dtstr)
-        headers='\n'.join(["%s: %s" % (k, v)
-                        for k,v in self.headers.items()])
-        return headers+'\n\n'+self.body
+        headers = '\n'.join(["{:s}: {:s}".format(k, v)
+                             for k, v in self.headers.items()])
+        return headers + '\n\n' + self.body
 
     def __str__(self):
         """
@@ -83,20 +87,18 @@ class Response(object):
         """
         return self.make_output().encode('utf-8')
 
+
 def get_htmltemplate():
     """
     レスポンスとして返すHTMLのうち，定型部分を返す
     """
-    html_body = u"""
-    <html>
+    html_body = """
+    <html lang="ja">
       <head>
-        <meta http-equiv="content-type"
-              content="text/html;charset=utf-8" />
+        <meta charset="utf-8">
       </head>
       <body>
-      %s
+      {:s}
       </body>
     </html>"""
     return html_body
-
-

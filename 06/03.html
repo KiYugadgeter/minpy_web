@@ -25,33 +25,40 @@ RSSを読み込み、辞書のリストとして要素を取り出すための�
 ** rssparser.py **
 
     :::python
-    #!/usr/bin/env python # coding: utf-8
+    #!/usr/bin/env python3
+    # coding: utf-8
+
     from xml.etree.ElementTree import ElementTree
-    from urllib import urlopen
-    
+    from urllib.request import urlopen
+
+
     def parse_rss(url):
         """
-        RSS 2.0をパースして、辞書のリストを返す
+        RSS 2.0をパースして，辞書のリストを返す
         """
-        rss=ElementTree(file=urlopen(url))
-        root=rss.getroot()
-        rsslist=[]
-        # RSS 2.0のitemエレメントだけを抜き出す
-        for item in [ x for x in root.getiterator()
-                              if "item" in x.tag]:
-            rssdict={}
-            for elem in item.getiterator():
-                for k in ['link', 'title', 'description',
-                          'author', 'pubDate']:
+        rss = ElementTree(file=urlopen(url))
+        root = rss.getroot()
+        rsslist = []
+        # RSS 2.0のitemエレメントだけを抜き出す
+        for item in root.iter("item"):
+            rssdict = {}
+            for elem in item.iter():
+                for k in ['link', 'title', 'description', 'author', 'pubDate']:
                     if k in elem.tag:
-                        rssdict[k]=elem.text
+                        rssdict[k] = elem.text
                     else:
-                        rssdict[k]=rssdict.get(k, "N/A")
+                        rssdict[k] = rssdict.get(k, "N/A")
             rsslist.append(rssdict)
         return rsslist
 
 
-RSS 2.0では、ブログ記事などのタイトル、リンクなどの要素がitemというエレメントの中に収まっています。このスクリプトでは、RSS 2.0相当のXML文字列を先頭から読み込み、itemエレメントを探し出す、という処理をしています。itemエレメントを探し出したら、リンクやタイトルといった要素を辞書に登録します。
+    if __name__ == '__main__':
+        rss = parse_rss('http://www.pythonware.com/daily/rss.xml')
+        for d in rss:
+            print("\n".join(["{:s} : {:s}".format(k, i) for k, i in d.items()]))
+
+
+RSS 2.0では、ブログ記事などのタイトル、リンクなどの要素がitemというエレメントの中に収まっています。このスクリプトでは、RSS 2.0相当のXML文字列を先頭から読み込み、そのあとでroot.iterでitemエレメントを返す、という処理をしています。itemエレメントを探し出したら、リンクやタイトルといった要素を辞書に登録します。
 
 1つの記事に対する要素が1つの辞書になります。複数itemエレメントがある場合は、複数の辞書がリストに登録されます。関数の戻り値となるのは、itemエレメントの内容を収めた辞書のリストです。
 
@@ -71,36 +78,40 @@ RSS 2.0では、ブログ記事などのタイトル、リンクな�
     :::python
     #!/usr/bin/env python
     # coding: utf-8
+
     from rssparser import parse_rss
     from httphandler import Request, Response, get_htmltemplate
-    import cgitb; cgitb.enable()     # (1)
-    
-    form_body=u"""
-    <form method="POST" action="/cgi-bin/rssreader1.py">
-      RSSのURL:
-      <input type="text" size="40" name="url" value="%s"/>
-      <input type="submit" />
-    </form>"""
-    rss_parts=u"""
-    <h3><a href="%(link)s">%(title)s</a></h3>
-    <p>%(description)s</p>
-    """                              # (3)
-    content=u"URLを入力してください"
-    req=Request()                    # (2)
+    import cgitb
+    cgitb.enable()    # (1)
+
+    form_body = """
+      <form method="POST" action="/cgi-bin/rssreader1.py">
+        RSSのURL:
+        <input type="text" size="40" name="url" value="{:s}"/>
+        <input type="submit" />
+      </form>"""
+
+    rss_parts = """
+    <h3><a href="{link:s}">{title:s}</a></h3>    # (3)
+    <p>{description:s}</p>
+    """
+
+    content = "URLを入力してください"
+    req = Request()    # (2)
     if req.form.has_key('url'):
         try:
-            rss_list=parse_rss(req.form['url'].value)
-            content=""
+            rss_list = parse_rss(req.form['url'].value)
+            content = ""
             for d in rss_list:
-                content+=rss_parts%d
+                content += rss_parts.format(d)
         except:
             pass
-    
-    res=Response()                   # (4)
-    body=form_body%req.form.getvalue('url', '')
-    body+=content
-    res.set_body(get_htmltemplate()%body)
-    print res                        # (5)
+
+    res = Response()    # (4)
+    body = form_body.format(req.form.getvalue('url', ''))
+    body += content
+    res.set_body(get_htmltemplate().format(body))
+    print(res)    # (5)
 
 プログラムの冒頭では、処理に利用するモジュールなどをインポートしています。インポートブロックの最後の行でcgitbというモジュールをインポートしています。このモジュールは、Webアプリケーションでエラーが起こったとき、分かりやすいエラーを表示するためのモジュールです。モジュールをインポートし、cgitb.enable()という関数を呼ぶと、エラーが起こったときにエラーの位置などを色つきで表示します(1)。
 
@@ -110,7 +121,7 @@ RSS 2.0では、ブログ記事などのタイトル、リンクな�
 
 「url」というキーがあった場合には、先ほど作った関数を使ってRSSをPythonのオブジェクトに変換します。変換したオブジェクトを元に、表示用のHTML文字列を作って足していきます。
 
-rss_partsという変数に入った文字列は、RSSの要素を埋め込むテンプレートのような役割をしています。文字列の埋め込みにはフォーマット文字列機能を使っています。テンプレートには「%(link)s」のように辞書のキーが埋め込まれています(3)。テンプレートと辞書を組み合わせると、キーを元に置換を行います。
+rss_partsという変数に入った文字列は、RSSの要素を埋め込むテンプレートのような役割をしています。文字列の埋め込みにはフォーマット文字列機能を使っています。テンプレートには「{link:s}」のように辞書のキーが埋め込まれています(3)。テンプレートと辞書を組み合わせると、キーを元に置換を行います。
 
 表示するHTMLができ上がったら、Responseクラスのインスタンスオブジェクトを作ります(4)。メソッドを使ってレスポンス本文をインスタンスに設定します。
 
